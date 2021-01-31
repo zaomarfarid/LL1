@@ -64,7 +64,7 @@ public class GS {
 
         for (char c : VnSet) {
             HashSet<Character> follow = followSet.get(c);
-            follow.remove('^');
+            follow.remove('Ɛ');
         }
 
         getSelect();
@@ -82,7 +82,7 @@ public class GS {
     }
 
     public void initExpression() {
-        Integer num = 0;
+        Integer num;
         expressionSet = new HashMap<Character, ArrayList<String>>();
         for (String gsItem : gsArray) {
             num = 0;
@@ -112,7 +112,7 @@ public class GS {
             String rights = temp[1];
             for (int i = 0; i < rights.length(); i++) {
                 char charItem = rights.charAt(i);
-                if (!VnSet.contains(charItem) && charItem != '|' && charItem != '^') {
+                if (!VnSet.contains(charItem) && charItem != '|' && charItem != 'Ɛ') {
                     VtSet.add(charItem);
                 }
             }
@@ -126,8 +126,8 @@ public class GS {
         }
         HashSet<Character> first = new HashSet<>();
         for (String itemStr : expressionSet.get(c)) {
-            if (itemStr.equals("^")) {
-                first.add('^');
+            if (itemStr.equals("Ɛ")) {
+                first.add('Ɛ');
             } else if (VtSet.contains(itemStr.charAt(0))) {
                 first.add(itemStr.charAt(0));
             } else {
@@ -137,7 +137,7 @@ public class GS {
                     }
                     HashSet<Character> curFirst = firstSet.get(cur);
                     first.addAll(curFirst);
-                    if (!curFirst.contains('^')) {
+                    if (!curFirst.contains('Ɛ')) {
                         break;
                     }
                 }
@@ -161,23 +161,23 @@ public class GS {
             if (VtSet.contains(cur)) {
                 first.add(cur);
                 break;
-            } else if (s.equals("^")) {
-                first.add('^');
+            } else if (s.equals("Ɛ")) {
+                first.add('Ɛ');
                 break;
             } else {
                 HashSet<Character> rightSet = firstSet.get(cur);
                 // Add the first set corresponding to cur to the first set of the string
                 first.addAll(rightSet);
-                // If cur can reach ^, continue
-                if (rightSet.contains('^')) {
+                // If cur can reach Ɛ, continue
+                if (rightSet.contains('Ɛ')) {
                     i++;
-                } else// Can't reach ^, then exit the loop
+                } else// Can't reach Ɛ, then exit the loop
                 {
                     break;
                 }
                 // If the tail is reached, the first set of all symbols contains an empty string
                 if (i == s.length()) {
-                    first.add('^');
+                    first.add('Ɛ');
                 }
             }
         }
@@ -190,7 +190,7 @@ public class GS {
         }
         HashSet<Character> follow = new HashSet<Character>();
         if (c == S) {
-            follow.add('#');
+            follow.add('$');
         }
         Iterator<Character> iterator = VnSet.iterator();
         while (iterator.hasNext()) {// Scan each left itemChar
@@ -219,7 +219,7 @@ public class GS {
                                         }
                                         HashSet<Character> first = firstSet.get(temps);
                                         follow.addAll(first);
-                                        if (!first.contains('^')) {
+                                        if (!first.contains('Ɛ')) {
                                             break;
                                         }
                                     }
@@ -256,11 +256,11 @@ public class GS {
             for (String itemStr : itemArr) {// for each production right itemStr
                 HashSet<Character> selectSet = new HashSet<Character>();
                 HashSet<Character> temp = firstSetX.get(itemStr);
-                if (itemStr.equals("^")) {
+                if (itemStr.equals("Ɛ")) {
                     HashSet<Character> follow = followSet.get(itemChar);
                     selectSet.addAll(follow);
-                } else if (temp.contains('^')) {
-                    temp.remove('^');
+                } else if (temp.contains('Ɛ')) {
+                    temp.remove('Ɛ');
                     selectSet.addAll(temp);
                     HashSet<Character> follow = followSet.get(itemChar);
                     selectSet.addAll(follow);
@@ -276,7 +276,7 @@ public class GS {
 
     public void createTable() {
         HashSet<Character> head = new HashSet<Character>(VtSet);
-        head.add('#');
+        head.add('$');
         Object[] VtArray = head.toArray();
         Object[] VnArray = VnSet.toArray();
         // Initialize the predictive analysis table

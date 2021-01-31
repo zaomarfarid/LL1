@@ -6,12 +6,13 @@ public class Main {
 
     public static void main(String[] args) {
         ArrayList<String> gsArray = new ArrayList<String>();
-        gsArray.add("S->MH|a");
-        gsArray.add("H->LS0|^");
-        gsArray.add("K->dML|^");
-        gsArray.add("L->eHf");
-        gsArray.add("M->K|bLM");
-        Character start = 'S';
+
+        gsArray.add("E->TӖ");
+        gsArray.add("Ӗ->+TӖ|Ɛ");
+        gsArray.add("T->FŤ");
+        gsArray.add("Ť->*FŤ|Ɛ");
+        gsArray.add("F->(E)|i");
+        Character start = 'E';
 
         GS test = new GS();
         test.setgsArray(gsArray);
