@@ -46,26 +46,26 @@ public class Parser {
         initExpression();
         getNontermAndTerm();
         // Construct the first set of non-terminal symbols
-        for (char c : Nonterm) {
+        Nonterm.forEach(c -> {
             getFirst(c);
-        }
+        });
         // Construct the follow set of start characters
         // getFollow(S);
         // Construct non-terminal follow set
-        for (char c : Nonterm) {
+        Nonterm.forEach(c -> {
             ArrayList<String> itemArr = expressionSet.get(c);
-            for (String itemStr : itemArr) {
+            itemArr.forEach(itemStr -> {
                 getFirstSetX(itemStr);
-            }
-        }
-        for (char c : Nonterm) {
+            });
+        });
+        Nonterm.forEach(c -> {
             getFollow(c);
-        }
+        });
 
-        for (char c : Nonterm) {
+        Nonterm.forEach(c -> {
             HashSet<Character> follow = followSet.get(c);
             follow.remove('Ɛ');
-        }
+        });
 
         getSelect();
         createTable();
@@ -102,12 +102,14 @@ public class Parser {
     }
 
     public void getNontermAndTerm() {
-        for (String parserItem : parserArray) {// Separate non-terminal symbols from the left
+        parserArray.forEach(parserItem -> {
+            // Separate non-terminal symbols from the left
             String[] temp = parserItem.split("->");
             char left = temp[0].charAt(0);
             Nonterm.add(left);
-        }
-        for (String parserItem : parserArray) {// Separate non-terminal symbols from the right
+        });
+        parserArray.forEach(parserItem -> {
+            // Separate non-terminal symbols from the right
             String[] temp = parserItem.split("->");
             String rights = temp[1];
             for (int i = 0; i < rights.length(); i++) {
@@ -116,7 +118,7 @@ public class Parser {
                     Terminals.add(charItem);
                 }
             }
-        }
+        });
     }
 
     public void getFirst(char c) {
@@ -195,7 +197,7 @@ public class Parser {
         while (iterator.hasNext()) {// Scan each left itemChar
             Character itemChar = iterator.next();
             ArrayList<String> itemArr = expressionSet.get(itemChar);
-            for (String itemStr : itemArr) {
+            itemArr.forEach(itemStr -> {
                 char val_c = c.charValue();
                 if (itemStr.indexOf(val_c) >= 0) {
                     for (int i = 0; i < itemStr.length(); i++) {
@@ -240,7 +242,7 @@ public class Parser {
                     }
                 }
 
-            }
+            });
         }
 
         followSet.put(c, follow);
@@ -318,25 +320,24 @@ public class Parser {
 
     public void output() {
         System.out.println("            --First");
-        for (Character c : Nonterm) {
+        Nonterm.forEach(c -> {
             HashSet<Character> set = firstSet.get(c);
             System.out.printf("%10s", c + "  ->   ");
             set.forEach(var -> {
                 System.out.print(var);
             });
             System.out.println();
-        }
-
+        });
         System.out.println("            --Follow");
 
-        for (Character c : Nonterm) {
+        Nonterm.forEach(c -> {
             HashSet<Character> set = followSet.get(c);
             System.out.print("Follow " + c + ":");
             set.forEach(var -> {
                 System.out.print(var);
             });
             System.out.println();
-        }
+        });
 
         System.out.println("            --LL1 Parsing Table");
 
