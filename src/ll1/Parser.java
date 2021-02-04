@@ -1,22 +1,22 @@
-package one;
+package ll1;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class GS {
+public class Parser {
     // Production of string input
 
-    private ArrayList<String> gsArray;
+    private ArrayList<String> parserArray;
 
     public HashMap<Character, ArrayList<String>> expressionSet;
     // Nonterminal
-    public HashSet<Character> VnSet;
+    public HashSet<Character> Nonterm;
     // Terminal
-    public HashSet<Character> VtSet;
+    public HashSet<Character> Terminals;
     // Start character
-    public Character S;
+    public Character Start;
     // Total number of production
     private HashMap<Character, Integer> numSet;
     // first set
@@ -30,10 +30,10 @@ public class GS {
     // Predictive analysis table
     public String[][] table;
 
-    public GS() {
-        gsArray = new ArrayList<String>();
-        VnSet = new HashSet<Character>();
-        VtSet = new HashSet<Character>();
+    public Parser() {
+        parserArray = new ArrayList<String>();
+        Nonterm = new HashSet<Character>();
+        Terminals = new HashSet<Character>();
         firstSet = new HashMap<Character, HashSet<Character>>();
         firstSetX = new HashMap<String, HashSet<Character>>();
         followSet = new HashMap<Character, HashSet<Character>>();
@@ -44,25 +44,25 @@ public class GS {
 
     public void init() {
         initExpression();
-        getVnVt();
+        getNontermAndTerm();
         // Construct the first set of non-terminal symbols
-        for (char c : VnSet) {
+        for (char c : Nonterm) {
             getFirst(c);
         }
         // Construct the follow set of start characters
         // getFollow(S);
         // Construct non-terminal follow set
-        for (char c : VnSet) {
+        for (char c : Nonterm) {
             ArrayList<String> itemArr = expressionSet.get(c);
             for (String itemStr : itemArr) {
                 getFirstSetX(itemStr);
             }
         }
-        for (char c : VnSet) {
+        for (char c : Nonterm) {
             getFollow(c);
         }
 
-        for (char c : VnSet) {
+        for (char c : Nonterm) {
             HashSet<Character> follow = followSet.get(c);
             follow.remove('Ɛ');
         }
@@ -72,21 +72,21 @@ public class GS {
         output();
     }
 
-    public void setgsArray(ArrayList<String> gsArray) {
-        this.gsArray = gsArray;
+    public void setParserArray(ArrayList<String> parserArray) {
+        this.parserArray = parserArray;
 
     }
 
     public void setStart(Character start) {
-        this.S = start;
+        this.Start = start;
     }
 
     public void initExpression() {
         Integer num;
         expressionSet = new HashMap<Character, ArrayList<String>>();
-        for (String gsItem : gsArray) {
+        for (String parserItem : parserArray) {
             num = 0;
-            String[] temp = gsItem.split("->");
+            String[] temp = parserItem.split("->");
             String lefts = temp[0];
             String rights = temp[1];
             char left = lefts.charAt(0);
@@ -101,19 +101,19 @@ public class GS {
         }
     }
 
-    public void getVnVt() {
-        for (String gsItem : gsArray) {// Separate non-terminal symbols from the left
-            String[] temp = gsItem.split("->");
+    public void getNontermAndTerm() {
+        for (String parserItem : parserArray) {// Separate non-terminal symbols from the left
+            String[] temp = parserItem.split("->");
             char left = temp[0].charAt(0);
-            VnSet.add(left);
+            Nonterm.add(left);
         }
-        for (String gsItem : gsArray) {// Separate non-terminal symbols from the right
-            String[] temp = gsItem.split("->");
+        for (String parserItem : parserArray) {// Separate non-terminal symbols from the right
+            String[] temp = parserItem.split("->");
             String rights = temp[1];
             for (int i = 0; i < rights.length(); i++) {
                 char charItem = rights.charAt(i);
-                if (!VnSet.contains(charItem) && charItem != '|' && charItem != 'Ɛ') {
-                    VtSet.add(charItem);
+                if (!Nonterm.contains(charItem) && charItem != '|' && charItem != 'Ɛ') {
+                    Terminals.add(charItem);
                 }
             }
         }
@@ -128,7 +128,7 @@ public class GS {
         for (String itemStr : expressionSet.get(c)) {
             if (itemStr.equals("Ɛ")) {
                 first.add('Ɛ');
-            } else if (VtSet.contains(itemStr.charAt(0))) {
+            } else if (Terminals.contains(itemStr.charAt(0))) {
                 first.add(itemStr.charAt(0));
             } else {
                 for (char cur : itemStr.toCharArray()) {
@@ -145,7 +145,6 @@ public class GS {
             }
         }
         firstSet.put(c, first);
-        return;
     }
 
     public void getFirstSetX(String s) {
@@ -158,7 +157,7 @@ public class GS {
             char cur = s.charAt(i);
             //if (!firstSet.containsKey(cur))
             // getFirst(cur);
-            if (VtSet.contains(cur)) {
+            if (Terminals.contains(cur)) {
                 first.add(cur);
                 break;
             } else if (s.equals("Ɛ")) {
@@ -189,10 +188,10 @@ public class GS {
             return;
         }
         HashSet<Character> follow = new HashSet<Character>();
-        if (c == S) {
+        if (c == Start) {
             follow.add('$');
         }
-        Iterator<Character> iterator = VnSet.iterator();
+        Iterator<Character> iterator = Nonterm.iterator();
         while (iterator.hasNext()) {// Scan each left itemChar
             Character itemChar = iterator.next();
             ArrayList<String> itemArr = expressionSet.get(itemChar);
@@ -206,14 +205,14 @@ public class GS {
                                 if (temp == c) {
                                     continue;
                                 }
-                                if (VtSet.contains(temp))// The end is the terminator
+                                if (Terminals.contains(temp))// The end is the terminator
                                 {
                                     follow.add(temp);
-                                } else if (VnSet.contains(temp)) {// The following is a non-terminal
+                                } else if (Nonterm.contains(temp)) {// The following is a non-terminal
                                     int j;
                                     for (j = i + 1; j < itemStr.length(); j++) {
                                         Character temps = itemStr.charAt(j);
-                                        if (VtSet.contains(temps)) {
+                                        if (Terminals.contains(temps)) {
                                             follow.add(temps);
                                             break;
                                         }
@@ -248,12 +247,13 @@ public class GS {
     }
 
     public void getSelect() {
-        Iterator<Character> iterator = VnSet.iterator();
+        Iterator<Character> iterator = Nonterm.iterator();
         while (iterator.hasNext()) {// For each non-terminal characterChar
             Character itemChar = iterator.next();
             HashMap<String, HashSet<Character>> selectItemMap = new HashMap<String, HashSet<Character>>();
             ArrayList<String> itemArr = expressionSet.get(itemChar);
-            for (String itemStr : itemArr) {// for each production right itemStr
+            itemArr.forEach(itemStr -> {
+                // for each production right itemStr
                 HashSet<Character> selectSet = new HashSet<Character>();
                 HashSet<Character> temp = firstSetX.get(itemStr);
                 if (itemStr.equals("Ɛ")) {
@@ -268,35 +268,34 @@ public class GS {
                     selectSet.addAll(temp);
                 }
                 selectItemMap.put(itemStr, selectSet);
-
-            }
+            });
             selectMap.put(itemChar, selectItemMap);
         }
     }
 
     public void createTable() {
-        HashSet<Character> head = new HashSet<Character>(VtSet);
+        HashSet<Character> head = new HashSet<Character>(Terminals);
         head.add('$');
-        Object[] VtArray = head.toArray();
-        Object[] VnArray = VnSet.toArray();
+        Object[] terminalsArray = head.toArray();
+        Object[] nonTermArray = Nonterm.toArray();
         // Initialize the predictive analysis table
-        table = new String[VnArray.length + 1][VtArray.length + 1];
-        table[0][0] = "Vn/Vt";
+        table = new String[nonTermArray.length + 1][terminalsArray.length + 1];
+        table[0][0] = "nT/T";
         // Initialize the first column of the first row
-        for (int i = 0; i < VtArray.length; i++) {
-            table[0][i + 1] = VtArray[i].toString();
+        for (int i = 0; i < terminalsArray.length; i++) {
+            table[0][i + 1] = terminalsArray[i].toString();
         }
-        for (int i = 0; i < VnArray.length; i++) {
-            table[i + 1][0] = VnArray[i] + "";
+        for (int i = 0; i < nonTermArray.length; i++) {
+            table[i + 1][0] = nonTermArray[i] + "";
         }
         // set all errors
-        for (int i = 0; i < VnArray.length; i++) {
-            for (int j = 0; j < VtArray.length; j++) {
+        for (int i = 0; i < nonTermArray.length; i++) {
+            for (int j = 0; j < terminalsArray.length; j++) {
                 table[i + 1][j + 1] = "  ";
             }
         }
         int i = 1, j = 1;
-        Iterator<Character> iterator = VnSet.iterator();
+        Iterator<Character> iterator = Nonterm.iterator();
         while (iterator.hasNext()) {
             Character itemChar = iterator.next();
             ArrayList<String> itemArr = expressionSet.get(itemChar);
@@ -318,42 +317,40 @@ public class GS {
     }
 
     public void output() {
-        System.out.println("********* first episode ********");
-        for (Character c : VnSet) {
+        System.out.println("            --First");
+        for (Character c : Nonterm) {
             HashSet<Character> set = firstSet.get(c);
             System.out.printf("%10s", c + "  ->   ");
-            for (Character var : set) {
+            set.forEach(var -> {
                 System.out.print(var);
-            }
+            });
             System.out.println();
         }
-        System.out.println("********** first episode **********");
-        System.out.println("********** follow episode *********");
 
-        for (Character c : VnSet) {
+        System.out.println("            --Follow");
+
+        for (Character c : Nonterm) {
             HashSet<Character> set = followSet.get(c);
             System.out.print("Follow " + c + ":");
-            for (Character var : set) {
+            set.forEach(var -> {
                 System.out.print(var);
-            }
+            });
             System.out.println();
         }
-        System.out.println("********** follow episode **********");
 
-        System.out.println("********** LL1 Predictive Analysis Table ********");
+        System.out.println("            --LL1 Parsing Table");
 
-        for (int i = 0; i < VnSet.size() + 1; i++) {
-            for (int j = 0; j < VtSet.size() + 2; j++) {
+        for (int i = 0; i < Nonterm.size() + 1; i++) {
+            for (int j = 0; j < Terminals.size() + 2; j++) {
                 System.out.printf("%6s", table[i][j] + " ");
             }
             System.out.println();
+            System.out.println("---------------------------------------------");
         }
-        System.out.println("********** LL1 Predictive Analysis Table ********");
-
     }
 
     public Character getStart() {
-        return S;
+        return Start;
     }
 
     public HashMap<Character, ArrayList<String>> getExpression() {
